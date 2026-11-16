@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gift_suggestion_app/screens/gift-detail-screen.dart';
+import 'favorites_screen.dart';
+import 'gift-detail-screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -7,352 +10,831 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isDark = true;
+  String selectedCategory = 'All';
   String searchText = "";
-  String? selectedCategory;
-  Set<String> favorites = {};
-  bool showAllCategories = false;
-  bool isDark = false;
+  bool showMoreCategories = false;
+  Set<String> favoriteNames = {};
+  Set<String> favoriteCategories = {};
+  TextEditingController searchController = TextEditingController();
 
-  // See All - ab naya page NAHI khulega, yahi Home par khulega
-  bool showAllPopular = false;
-  bool showAllRecommended = false;
-
-  final List<Map<String, dynamic>> categories = [
-    {"name": "Birthday", "emoji": "🎂", "color": Colors.purple},
-    {"name": "Friendship", "emoji": "🤝", "color": Colors.green},
-    {"name": "Anniversary", "emoji": "💐", "color": Colors.pink},
-    {"name": "Love", "emoji": "❤️", "color": Colors.red},
-    {"name": "For Her", "emoji": "🧸", "color": Colors.pinkAccent},
-    {"name": "Mother's Day", "emoji": "🤱", "color": Colors.pinkAccent},
-    {"name": "Father's Day", "emoji": "👨", "color": Colors.blueGrey},
-    {"name": "Teacher's Day", "emoji": "👩‍🏫", "color": Colors.deepPurple},
-    {"name": "Wedding", "emoji": "💍", "color": Colors.red},
-    {"name": "Ramadan", "emoji": "🌙", "color": Colors.teal},
-    {"name": "Eid", "emoji": "🎉", "color": Colors.green},
-    {"name": "Thank You", "emoji": "🙏", "color": Colors.orange},
-    {"name": "Graduation", "emoji": "🎓", "color": Colors.blue},
-    {"name": "Baby Shower", "emoji": "👶", "color": Colors.lightBlue},
+  final List<Map<String, String>> topCategories = [
+    {"name": "All", "emoji": "🎁"},
+    {"name": "For Her", "emoji": "🧸"},
+    {"name": "For Him", "emoji": "⌚"},
+    {"name": "Birthday", "emoji": "🎂"},
+    {"name": "Anniversary", "emoji": "🌹"},
+    {"name": "Get Well Soon", "emoji": "💐"},
   ];
 
-  final List<Map<String, dynamic>> allGifts = [
-    {"title": "Birthday Cake", "desc": "Chocolate Cake with Balloons to make Birthday more special", "price": "PKR 2,500+", "type": "Cake Gift", "decoration": "Balloons + Cake Decoration", "category": "Birthday", "emoji": "🎂", "color": Colors.purple},
-    {"title": "Birthday Balloons", "desc": "Colorful Balloons to make Birthday more special and fun", "price": "PKR 500+", "type": "Decoration Gift", "decoration": "Balloons Decoration", "category": "Birthday", "emoji": "🎈", "color": Colors.purple},
-    {"title": "Birthday Surprise Box", "desc": "Cake, Card and Balloons Surprise for Birthday", "price": "PKR 3,000+", "type": "Surprise Gift", "decoration": "Surprise Box Decoration", "category": "Birthday", "emoji": "🎁", "color": Colors.purple},
-    {"title": "Birthday Teddy", "desc": "Cute Soft Teddy for Birthday - Best for kids", "price": "PKR 1,500+", "type": "Toy Gift", "decoration": "Teddy + Ribbon", "category": "Birthday", "emoji": "🧸", "color": Colors.purple},
-    {"title": "Birthday Chocolates", "desc": "Premium Chocolates Box for Birthday celebration", "price": "PKR 800+", "type": "Sweet Gift", "decoration": "Chocolate Box Decoration", "category": "Birthday", "emoji": "🍫", "color": Colors.purple},
-    {"title": "Birthday Card", "desc": "Handmade Birthday Card with lovely message", "price": "PKR 500+", "type": "Card Gift", "decoration": "Card + Ribbon", "category": "Birthday", "emoji": "💌", "color": Colors.purple},
-    {"title": "Friendship Bracelet", "desc": "Best Friend Bracelet for Friendship", "price": "PKR 800+", "type": "Bracelet Gift", "decoration": "Bracelet Box", "category": "Friendship", "emoji": "🤝", "color": Colors.green},
-    {"title": "Friendship Teddy", "desc": "Cute Teddy for Friend", "price": "PKR 1,500+", "type": "Toy Gift", "decoration": "Teddy Packing", "category": "Friendship", "emoji": "🧸", "color": Colors.green},
-    {"title": "Friendship Mug", "desc": "Best Friend Mug", "price": "PKR 700+", "type": "Mug Gift", "decoration": "Mug Packing", "category": "Friendship", "emoji": "☕", "color": Colors.green},
-    {"title": "Friendship Chocolates", "desc": "Chocolates for Friend", "price": "PKR 800+", "type": "Sweet Gift", "decoration": "Chocolate Box", "category": "Friendship", "emoji": "🍫", "color": Colors.green},
-    {"title": "Anniversary Roses", "desc": "Fresh Red Roses for Anniversary to express love", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Rose Bouquet Decoration", "category": "Anniversary", "emoji": "🌹", "color": Colors.pink},
-    {"title": "Love Bouquet", "desc": "Pink Roses Bouquet for Anniversary", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Bouquet Decoration", "category": "Anniversary", "emoji": "💐", "color": Colors.pink},
-    {"title": "Couple Mug Set", "desc": "Mr and Mrs Mug Set for Anniversary couple", "price": "PKR 1,800+", "type": "Couple Gift", "decoration": "Gift Box Packing", "category": "Anniversary", "emoji": "☕", "color": Colors.pink},
-    {"title": "Couple Photo Frame", "desc": "Anniversary Memory Frame with couple photo", "price": "PKR 1,000+", "type": "Memory Gift", "decoration": "Frame Decoration", "category": "Anniversary", "emoji": "🖼️", "color": Colors.pink},
-    {"title": "Love Roses", "desc": "Red Roses to express Love", "price": "PKR 1,500+", "type": "Flowers Gift", "decoration": "Rose Bouquet", "category": "Love", "emoji": "🌹", "color": Colors.red},
-    {"title": "Love Teddy", "desc": "Cute Teddy for your Love", "price": "PKR 1,500+", "type": "Toy Gift", "decoration": "Teddy + Ribbon", "category": "Love", "emoji": "🧸", "color": Colors.red},
-    {"title": "Love Card", "desc": "Love Card with sweet words", "price": "PKR 500+", "type": "Card Gift", "decoration": "Card + Ribbon", "category": "Love", "emoji": "💌", "color": Colors.red},
-    {"title": "Love Chocolates", "desc": "Heart Chocolates for Love", "price": "PKR 1,000+", "type": "Sweet Gift", "decoration": "Chocolate Box", "category": "Love", "emoji": "🍫", "color": Colors.red},
-    {"title": "Perfume for Her", "desc": "Luxury Perfume for Her", "price": "PKR 2,500+", "type": "Perfume Gift", "decoration": "Premium Packing", "category": "For Her", "emoji": "🌸", "color": Colors.pinkAccent},
-    {"title": "Saree for Her", "desc": "Beautiful Saree for Her", "price": "PKR 4,500+", "type": "Dress Gift", "decoration": "Saree Packing", "category": "For Her", "emoji": "👗", "color": Colors.pinkAccent},
-    {"title": "Teddy for Her", "desc": "Cute Teddy for Her", "price": "PKR 1,500+", "type": "Toy Gift", "decoration": "Teddy Packing", "category": "For Her", "emoji": "🧸", "color": Colors.pinkAccent},
-    {"title": "Jewellery for Her", "desc": "Elegant Jewellery for Her", "price": "PKR 2,000+", "type": "Jewellery Gift", "decoration": "Jewellery Box", "category": "For Her", "emoji": "💎", "color": Colors.pinkAccent},
-    {"title": "Bouquet for Maa", "desc": "Pink Roses for Maa to make her day special", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Bouquet Decoration", "category": "Mother's Day", "emoji": "💐", "color": Colors.pinkAccent},
-    {"title": "Cake for Maa", "desc": "Special Cake for Ammi with love", "price": "PKR 1,000+", "type": "Cake Gift", "decoration": "Cake Decoration", "category": "Mother's Day", "emoji": "🎂", "color": Colors.pinkAccent},
-    {"title": "Saree for Maa", "desc": "Beautiful Saree for Mother's Day", "price": "PKR 4,500+", "type": "Dress Gift", "decoration": "Saree Packing", "category": "Mother's Day", "emoji": "👗", "color": Colors.pinkAccent},
-    {"title": "Shawl for Maa", "desc": "Warm Shawl for Maa", "price": "PKR 2,000+", "type": "Dress Gift", "decoration": "Shawl Packing", "category": "Mother's Day", "emoji": "🧣", "color": Colors.pinkAccent},
-    {"title": "Watch for Abu", "desc": "Premium Watch for Abu - Best Father's Day Gift", "price": "PKR 2,000+", "type": "Watch Gift", "decoration": "Watch Box Packing", "category": "Father's Day", "emoji": "⌚", "color": Colors.blueGrey},
-    {"title": "Wallet for Abu", "desc": "Leather Wallet for Abu", "price": "PKR 1,500+", "type": "Wallet Gift", "decoration": "Wallet Box", "category": "Father's Day", "emoji": "👛", "color": Colors.blueGrey},
-    {"title": "Shirt for Abu", "desc": "Premium Shirt for Abu", "price": "PKR 2,000+", "type": "Dress Gift", "decoration": "Shirt Packing", "category": "Father's Day", "emoji": "👔", "color": Colors.blueGrey},
-    {"title": "Perfume for Abu", "desc": "Best Perfume for Abu", "price": "PKR 2,500+", "type": "Perfume Gift", "decoration": "Premium Packing", "category": "Father's Day", "emoji": "🧴", "color": Colors.blueGrey},
-    {"title": "Bouquet for Teacher", "desc": "Flowers for Teacher to say Thank You", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Bouquet Decoration", "category": "Teacher's Day", "emoji": "💐", "color": Colors.deepPurple},
-    {"title": "Book for Teacher", "desc": "Best Book Gift for Teacher", "price": "PKR 1,000+", "type": "Book Gift", "decoration": "Book Packing", "category": "Teacher's Day", "emoji": "📚", "color": Colors.deepPurple},
-    {"title": "Pen Set for Teacher", "desc": "Premium Pen Set for Teacher", "price": "PKR 1,500+", "type": "Pen Gift", "decoration": "Pen Box", "category": "Teacher's Day", "emoji": "🖊️", "color": Colors.deepPurple},
-    {"title": "Wedding Hamper", "desc": "Premium Couple Hamper for Wedding", "price": "PKR 2,000+", "type": "Hamper Gift", "decoration": "Hamper Decoration", "category": "Wedding", "emoji": "💍", "color": Colors.red},
-    {"title": "Wedding Flowers", "desc": "White Roses Bouquet for Wedding", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Bridal Bouquet", "category": "Wedding", "emoji": "🌹", "color": Colors.red},
-    {"title": "Wedding Saree", "desc": "Beautiful Saree for Wedding", "price": "PKR 5,000+", "type": "Dress Gift", "decoration": "Saree Packing", "category": "Wedding", "emoji": "👗", "color": Colors.red},
-    {"title": "Bridal Jewellery", "desc": "Elegant Jewellery for Bride", "price": "PKR 2,000+", "type": "Jewellery Gift", "decoration": "Jewellery Box", "category": "Wedding", "emoji": "💎", "color": Colors.red},
-    {"title": "Ramadan Hamper", "desc": "Dates and Dry Fruits Hamper for Ramadan", "price": "PKR 2,000+", "type": "Hamper Gift", "decoration": "Hamper Decoration", "category": "Ramadan", "emoji": "🌙", "color": Colors.teal},
-    {"title": "Quran Gift Set", "desc": "Beautiful Quran with Cover for Ramadan", "price": "PKR 2,500+", "type": "Islamic Gift", "decoration": "Quran Box", "category": "Ramadan", "emoji": "📖", "color": Colors.teal},
-    {"title": "Prayer Mat", "desc": "Soft Janamaz for Ramadan", "price": "PKR 1,800+", "type": "Islamic Gift", "decoration": "Janamaz Packing", "category": "Ramadan", "emoji": "🕌", "color": Colors.teal},
-    {"title": "Dates Box", "desc": "Premium Khajoor Box for Ramadan", "price": "PKR 1,500+", "type": "Food Gift", "decoration": "Dates Box", "category": "Ramadan", "emoji": "🌴", "color": Colors.teal},
-    {"title": "Eid Gift Box", "desc": "Special Eid Gift Box with love", "price": "PKR 2,000+", "type": "Gift Box", "decoration": "Eid Box Decoration", "category": "Eid", "emoji": "🎁", "color": Colors.green},
-    {"title": "Eid Cake", "desc": "Delicious Cake for Eid celebration", "price": "PKR 1,000+", "type": "Cake Gift", "decoration": "Eid Cake Decoration", "category": "Eid", "emoji": "🎂", "color": Colors.green},
-    {"title": "Eidi Envelope", "desc": "Beautiful Eidi Envelope for Eid", "price": "PKR 500+", "type": "Eidi Gift", "decoration": "Envelope Decoration", "category": "Eid", "emoji": "💌", "color": Colors.green},
-    {"title": "Eid Sweets", "desc": "Mithai Box for Eid", "price": "PKR 800+", "type": "Sweet Gift", "decoration": "Mithai Box", "category": "Eid", "emoji": "🍬", "color": Colors.green},
-    {"title": "Thank You Hamper", "desc": "Chocolates and Thank You Card", "price": "PKR 1,500+", "type": "Hamper Gift", "decoration": "Hamper Decoration", "category": "Thank You", "emoji": "🍫", "color": Colors.orange},
-    {"title": "Thank You Flowers", "desc": "Fresh Flowers to say Thank You", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Bouquet Decoration", "category": "Thank You", "emoji": "🌷", "color": Colors.orange},
-    {"title": "Graduation Bouquet", "desc": "Flowers for Graduation celebration", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Bouquet Decoration", "category": "Graduation", "emoji": "💐", "color": Colors.blue},
-    {"title": "Graduation Cake", "desc": "Cake for Graduation celebration", "price": "PKR 1,000+", "type": "Cake Gift", "decoration": "Cake Decoration", "category": "Graduation", "emoji": "🎂", "color": Colors.blue},
-    {"title": "Graduation Book", "desc": "Motivational Book for Graduate", "price": "PKR 1,000+", "type": "Book Gift", "decoration": "Book Packing", "category": "Graduation", "emoji": "📚", "color": Colors.blue},
-    {"title": "Baby Clothes Set", "desc": "Soft Clothes for Baby", "price": "PKR 2,000+", "type": "Clothes Gift", "decoration": "Baby Packing", "category": "Baby Shower", "emoji": "👶", "color": Colors.lightBlue},
-    {"title": "Baby Teddy", "desc": "Cute Teddy for Baby", "price": "PKR 1,500+", "type": "Toy Gift", "decoration": "Teddy Packing", "category": "Baby Shower", "emoji": "🧸", "color": Colors.lightBlue},
-    {"title": "Baby Toys", "desc": "Safe Toys for Baby", "price": "PKR 1,000+", "type": "Toy Gift", "decoration": "Toy Packing", "category": "Baby Shower", "emoji": "🧩", "color": Colors.lightBlue},
+  final List<Map<String, String>> moreCategories = [
+    {"name": "Mothers Day", "emoji": "👩‍👧"},
+    {"name": "Fathers Day", "emoji": "👨‍👧"},
+    {"name": "Teachers Day", "emoji": "👩‍🏫"},
+    {"name": "Eid", "emoji": "🌙"},
+    {"name": "Wedding / Barat", "emoji": "💍"},
+    {"name": "Baby Shower", "emoji": "👶"},
+    {"name": "Friendship Day", "emoji": "🤝"},
+    {"name": "Valentine Day", "emoji": "❤️"},
+    {"name": "Graduation", "emoji": "🎓"},
+    {"name": "New Year", "emoji": "🎉"},
+    {"name": "Thank You", "emoji": "🙏"},
+    {"name": "House Warming", "emoji": "🏠"},
   ];
 
-  // ===== Logo wala Purple - Blue nahi =====
-  Color get bgColor => isDark ? const Color(0xFF1E0B3D) : const Color(0xFFF3EDFF);
-  Color get cardColor => isDark ? const Color(0xFF31135E) : Colors.white;
-  Color get textColor => isDark ? Colors.white : Colors.black;
-  Color get subTextColor => isDark ? const Color(0xFFE9D5FF) : Colors.black54;
-  Color get searchColor => isDark ? const Color(0xFF31135E) : Colors.white;
-  Color get catBg => isDark ? const Color(0xFF3B1A6B) : const Color(0xFFEDE7F6);
-  Color get detailBg => isDark ? const Color(0xFF3B1A6B) : const Color(0xFFF6F0FF);
-  Color get priceColor => isDark ? const Color(0xFFE9D5FF) : const Color(0xFF7B2FF7);
+  final List<Map<String, String>> allGifts = [
+    {"name": "Teddy Bear", "category": "For Her", "emoji": "🧸"},
+    {"name": "Chocolate Box", "category": "For Her", "emoji": "🍫"},
+    {"name": "Rose Bouquet", "category": "For Her", "emoji": "🌹"},
+    {"name": "Makeup Kit", "category": "For Her", "emoji": "💄"},
+    {"name": "Jewellery Set", "category": "For Her", "emoji": "💎"},
+    {"name": "Hand Bag", "category": "For Her", "emoji": "👜"},
+    {"name": "Scented Perfume", "category": "For Her", "emoji": "🌸"},
+    {"name": "Plush Toy", "category": "For Her", "emoji": "🐻"},
+    {"name": "Skin Care Set", "category": "For Her", "emoji": "🧴"},
+    {"name": "Cute Mug", "category": "For Her", "emoji": "☕"},
+    {"name": "Hair Accessories", "category": "For Her", "emoji": "🎀"},
+    {"name": "Love Letter Box", "category": "For Her", "emoji": "💌"},
+    {"name": "Watch", "category": "For Him", "emoji": "⌚"},
+    {"name": "Perfume", "category": "For Him", "emoji": "🌸"},
+    {"name": "Wallet", "category": "For Him", "emoji": "👛"},
+    {"name": "Sunglasses", "category": "For Him", "emoji": "🕶️"},
+    {"name": "Leather Belt", "category": "For Him", "emoji": "🧳"},
+    {"name": "Sports Shoes", "category": "For Him", "emoji": "👟"},
+    {"name": "Headphones", "category": "For Him", "emoji": "🎧"},
+    {"name": "Smart Watch", "category": "For Him", "emoji": "⌚"},
+    {"name": "Shaving Kit", "category": "For Him", "emoji": "🪒"},
+    {"name": "T-Shirt", "category": "For Him", "emoji": "👕"},
+    {"name": "Backpack", "category": "For Him", "emoji": "🎒"},
+    {"name": "Coffee Mug", "category": "For Him", "emoji": "☕"},
+    {"name": "Birthday Cake", "category": "Birthday", "emoji": "🎂"},
+    {"name": "Birthday Balloons", "category": "Birthday", "emoji": "🎈"},
+    {"name": "Birthday Card", "category": "Birthday", "emoji": "💌"},
+    {"name": "Birthday Gift Box", "category": "Birthday", "emoji": "🎁"},
+    {"name": "Party Caps", "category": "Birthday", "emoji": "🎉"},
+    {"name": "Chocolate Cake", "category": "Birthday", "emoji": "🍫"},
+    {"name": "Photo Cake", "category": "Birthday", "emoji": "📸"},
+    {"name": "Flower Cake", "category": "Birthday", "emoji": "🌸"},
+    {"name": "Teddy Cake", "category": "Birthday", "emoji": "🧸"},
+    {"name": "Cupcakes Set", "category": "Birthday", "emoji": "🧁"},
+    {"name": "Surprise Box", "category": "Birthday", "emoji": "🎁"},
+    {"name": "Birthday Flowers", "category": "Birthday", "emoji": "💐"},
+    {"name": "Flowers", "category": "Anniversary", "emoji": "🌹"},
+    {"name": "Couple Mug", "category": "Anniversary", "emoji": "☕"},
+    {"name": "Couple Watch", "category": "Anniversary", "emoji": "⌚"},
+    {"name": "Anniversary Cake", "category": "Anniversary", "emoji": "🎂"},
+    {"name": "Love Frame", "category": "Anniversary", "emoji": "🖼️"},
+    {"name": "Couple Cushion", "category": "Anniversary", "emoji": "❤️"},
+    {"name": "Rose Chocolates", "category": "Anniversary", "emoji": "🍫"},
+    {"name": "Anniversary Card", "category": "Anniversary", "emoji": "💌"},
+    {"name": "Couple T-Shirt", "category": "Anniversary", "emoji": "👕"},
+    {"name": "Candle Dinner Set", "category": "Anniversary", "emoji": "🕯️"},
+    {"name": "Memory Album", "category": "Anniversary", "emoji": "📸"},
+    {"name": "Heart Balloon", "category": "Anniversary", "emoji": "🎈"},
+    {"name": "Greeting Card", "category": "Get Well Soon", "emoji": "💌"},
+    {"name": "Fruit Basket", "category": "Get Well Soon", "emoji": "🍎"},
+    {"name": "Get Well Flowers", "category": "Get Well Soon", "emoji": "💐"},
+    {"name": "Soup Basket", "category": "Get Well Soon", "emoji": "🍲"},
+    {"name": "Herbal Tea Set", "category": "Get Well Soon", "emoji": "🍵"},
+    {"name": "Soft Blanket", "category": "Get Well Soon", "emoji": "🧣"},
+    {"name": "Care Hamper", "category": "Get Well Soon", "emoji": "🎁"},
+    {"name": "Motivation Book", "category": "Get Well Soon", "emoji": "📖"},
+    {"name": "Dry Fruits", "category": "Get Well Soon", "emoji": "🥜"},
+    {"name": "Juice Basket", "category": "Get Well Soon", "emoji": "🧃"},
+    {"name": "Flower Bouquet", "category": "Mothers Day", "emoji": "💐"},
+    {"name": "Scented Candle", "category": "Mothers Day", "emoji": "🕯️"},
+    {"name": "Mom Mug", "category": "Mothers Day", "emoji": "☕"},
+    {"name": "Shawl", "category": "Mothers Day", "emoji": "🧣"},
+    {"name": "Mom Cake", "category": "Mothers Day", "emoji": "🎂"},
+    {"name": "Jewellery Box", "category": "Mothers Day", "emoji": "💎"},
+    {"name": "Mom Frame", "category": "Mothers Day", "emoji": "🖼️"},
+    {"name": "Tea Set", "category": "Mothers Day", "emoji": "🍵"},
+    {"name": "Mom Chocolates", "category": "Mothers Day", "emoji": "🍫"},
+    {"name": "Prayer Mat", "category": "Mothers Day", "emoji": "🕌"},
+    {"name": "Dad Wallet", "category": "Fathers Day", "emoji": "👛"},
+    {"name": "Tie Set", "category": "Fathers Day", "emoji": "👔"},
+    {"name": "Dad Mug", "category": "Fathers Day", "emoji": "☕"},
+    {"name": "Dad Perfume", "category": "Fathers Day", "emoji": "🌸"},
+    {"name": "Dad Cake", "category": "Fathers Day", "emoji": "🎂"},
+    {"name": "Shirt", "category": "Fathers Day", "emoji": "👕"},
+    {"name": "Dad Frame", "category": "Fathers Day", "emoji": "🖼️"},
+    {"name": "Watch for Dad", "category": "Fathers Day", "emoji": "⌚"},
+    {"name": "Cap", "category": "Fathers Day", "emoji": "🧢"},
+    {"name": "Dad Chocolates", "category": "Fathers Day", "emoji": "🍫"},
+    {"name": "Best Teacher Mug", "category": "Teachers Day", "emoji": "📚"},
+    {"name": "Thank You Card", "category": "Teachers Day", "emoji": "💌"},
+    {"name": "Teacher Flowers", "category": "Teachers Day", "emoji": "💐"},
+    {"name": "Diary", "category": "Teachers Day", "emoji": "📓"},
+    {"name": "Pen Set", "category": "Teachers Day", "emoji": "🖊️"},
+    {"name": "Book", "category": "Teachers Day", "emoji": "📖"},
+    {"name": "Teacher Cake", "category": "Teachers Day", "emoji": "🎂"},
+    {"name": "Teacher Frame", "category": "Teachers Day", "emoji": "🖼️"},
+    {"name": "Chocolates", "category": "Teachers Day", "emoji": "🍫"},
+    {"name": "Plant", "category": "Teachers Day", "emoji": "🪴"},
+    {"name": "Eidi Envelope", "category": "Eid", "emoji": "💌"},
+    {"name": "Dry Fruits Box", "category": "Eid", "emoji": "🥜"},
+    {"name": "Eid Cake", "category": "Eid", "emoji": "🎂"},
+    {"name": "Eid Gift Box", "category": "Eid", "emoji": "🎁"},
+    {"name": "Mehndi Set", "category": "Eid", "emoji": "🌸"},
+    {"name": "Eid Dress", "category": "Eid", "emoji": "👗"},
+    {"name": "Eid Chocolates", "category": "Eid", "emoji": "🍫"},
+    {"name": "Dates Box", "category": "Eid", "emoji": "🌴"},
+    {"name": "Eid Flowers", "category": "Eid", "emoji": "💐"},
+    {"name": "Eid Card", "category": "Eid", "emoji": "💌"},
+    {"name": "Bridal Gift Set", "category": "Wedding / Barat", "emoji": "💍"},
+    {"name": "Wedding Frame", "category": "Wedding / Barat", "emoji": "🖼️"},
+    {"name": "Bridal Jewellery", "category": "Wedding / Barat", "emoji": "💎"},
+    {"name": "Wedding Cake", "category": "Wedding / Barat", "emoji": "🎂"},
+    {"name": "Couple Gift Box", "category": "Wedding / Barat", "emoji": "🎁"},
+    {"name": "Bridal Clutch", "category": "Wedding / Barat", "emoji": "👜"},
+    {"name": "Wedding Flowers", "category": "Wedding / Barat", "emoji": "💐"},
+    {"name": "Dinner Set", "category": "Wedding / Barat", "emoji": "🍽️"},
+    {"name": "Bed Sheet Set", "category": "Wedding / Barat", "emoji": "🛏️"},
+    {"name": "Wedding Card", "category": "Wedding / Barat", "emoji": "💌"},
+    {"name": "Baby Toys", "category": "Baby Shower", "emoji": "🧸"},
+    {"name": "Baby Clothes", "category": "Baby Shower", "emoji": "👶"},
+    {"name": "Baby Blanket", "category": "Baby Shower", "emoji": "🧣"},
+    {"name": "Baby Feeder Set", "category": "Baby Shower", "emoji": "🍼"},
+    {"name": "Baby Cake", "category": "Baby Shower", "emoji": "🎂"},
+    {"name": "Baby Balloons", "category": "Baby Shower", "emoji": "🎈"},
+    {"name": "Baby Frame", "category": "Baby Shower", "emoji": "🖼️"},
+    {"name": "Baby Shoes", "category": "Baby Shower", "emoji": "👟"},
+    {"name": "Baby Gift Box", "category": "Baby Shower", "emoji": "🎁"},
+    {"name": "Baby Rattle", "category": "Baby Shower", "emoji": "🎀"},
+    {"name": "Friendship Bracelet", "category": "Friendship Day", "emoji": "💛"},
+    {"name": "Photo Frame", "category": "Friendship Day", "emoji": "📸"},
+    {"name": "Friend Mug", "category": "Friendship Day", "emoji": "☕"},
+    {"name": "Friend Cake", "category": "Friendship Day", "emoji": "🎂"},
+    {"name": "Friend Chocolates", "category": "Friendship Day", "emoji": "🍫"},
+    {"name": "Friendship Card", "category": "Friendship Day", "emoji": "💌"},
+    {"name": "Best Friend T-Shirt", "category": "Friendship Day", "emoji": "👕"},
+    {"name": "Friend Gift Box", "category": "Friendship Day", "emoji": "🎁"},
+    {"name": "Friend Flowers", "category": "Friendship Day", "emoji": "💐"},
+    {"name": "Memory Book", "category": "Friendship Day", "emoji": "📖"},
+    {"name": "Red Roses", "category": "Valentine Day", "emoji": "🌹"},
+    {"name": "Heart Chocolate", "category": "Valentine Day", "emoji": "❤️"},
+    {"name": "Valentine Teddy", "category": "Valentine Day", "emoji": "🧸"},
+    {"name": "Love Mug", "category": "Valentine Day", "emoji": "☕"},
+    {"name": "Valentine Cake", "category": "Valentine Day", "emoji": "🎂"},
+    {"name": "Love Card", "category": "Valentine Day", "emoji": "💌"},
+    {"name": "Valentine Frame", "category": "Valentine Day", "emoji": "🖼️"},
+    {"name": "Heart Balloon", "category": "Valentine Day", "emoji": "🎈"},
+    {"name": "Valentine Perfume", "category": "Valentine Day", "emoji": "🌸"},
+    {"name": "Love Gift Box", "category": "Valentine Day", "emoji": "🎁"},
+    {"name": "Graduation Cap Gift", "category": "Graduation", "emoji": "🎓"},
+    {"name": "Success Diary", "category": "Graduation", "emoji": "📓"},
+    {"name": "Graduation Cake", "category": "Graduation", "emoji": "🎂"},
+    {"name": "Success Pen", "category": "Graduation", "emoji": "🖊️"},
+    {"name": "Graduation Frame", "category": "Graduation", "emoji": "🖼️"},
+    {"name": "Success Flowers", "category": "Graduation", "emoji": "💐"},
+    {"name": "Laptop Bag", "category": "Graduation", "emoji": "💼"},
+    {"name": "Graduation Card", "category": "Graduation", "emoji": "💌"},
+    {"name": "Success Chocolates", "category": "Graduation", "emoji": "🍫"},
+    {"name": "Graduation Gift Box", "category": "Graduation", "emoji": "🎁"},
+    {"name": "New Year Cake", "category": "New Year", "emoji": "🎂"},
+    {"name": "Party Gift Box", "category": "New Year", "emoji": "🎁"},
+    {"name": "New Year Card", "category": "New Year", "emoji": "💌"},
+    {"name": "New Year Flowers", "category": "New Year", "emoji": "💐"},
+    {"name": "Party Balloons", "category": "New Year", "emoji": "🎈"},
+    {"name": "New Year Chocolates", "category": "New Year", "emoji": "🍫"},
+    {"name": "New Year Diary", "category": "New Year", "emoji": "📓"},
+    {"name": "New Year Frame", "category": "New Year", "emoji": "🖼️"},
+    {"name": "Celebration Box", "category": "New Year", "emoji": "🎉"},
+    {"name": "New Year Mug", "category": "New Year", "emoji": "☕"},
+    {"name": "Thank You Flowers", "category": "Thank You", "emoji": "🌷"},
+    {"name": "Sweet Box", "category": "Thank You", "emoji": "🍬"},
+    {"name": "Thank You Cake", "category": "Thank You", "emoji": "🎂"},
+    {"name": "Thank You Card", "category": "Thank You", "emoji": "💌"},
+    {"name": "Thank You Mug", "category": "Thank You", "emoji": "☕"},
+    {"name": "Thank You Gift Box", "category": "Thank You", "emoji": "🎁"},
+    {"name": "Thank You Chocolates", "category": "Thank You", "emoji": "🍫"},
+    {"name": "Thank You Frame", "category": "Thank You", "emoji": "🖼️"},
+    {"name": "Thank You Plant", "category": "Thank You", "emoji": "🪴"},
+    {"name": "Thank You Diary", "category": "Thank You", "emoji": "📓"},
+    {"name": "Home Decor Set", "category": "House Warming", "emoji": "🏠"},
+    {"name": "Plant Gift", "category": "House Warming", "emoji": "🪴"},
+    {"name": "Wall Frame", "category": "House Warming", "emoji": "🖼️"},
+    {"name": "Cushion Set", "category": "House Warming", "emoji": "🛋️"},
+    {"name": "Dinner Set Gift", "category": "House Warming", "emoji": "🍽️"},
+    {"name": "Lamp", "category": "House Warming", "emoji": "💡"},
+    {"name": "House Cake", "category": "House Warming", "emoji": "🎂"},
+    {"name": "House Flowers", "category": "House Warming", "emoji": "💐"},
+    {"name": "House Gift Box", "category": "House Warming", "emoji": "🎁"},
+    {"name": "Quran Frame", "category": "House Warming", "emoji": "🕌"},
+  ];
 
-  String emojiFor(String text) {
-    String t = text.toLowerCase();
-    if (t.contains("brother") || t.contains("bhai")) return "👦";
-    if (t.contains("sister") || t.contains("behen")) return "👧";
-    if (t.contains("ramadan") || t.contains("ramzan") || t.contains("roza") || t.contains("iftar")) return "🌙";
-    if (t.contains("eid") || t.contains("eidi")) return "🎉";
-    if (t.contains("mother") || t.contains("maa") || t.contains("ammi") || t.contains("mom")) return "🤱";
-    if (t.contains("father") || t.contains("abu") || t.contains("dad")) return "👨";
-    if (t.contains("teacher") || t.contains("ustad") || t.contains("sir")) return "👩‍🏫";
-    if (t.contains("birthday") || t.contains("cake")) return "🎂";
-    if (t.contains("wedding") || t.contains("shaadi")) return "💍";
-    if (t.contains("love") || t.contains("valentine")) return "❤️";
-    if (t.contains("flower") || t.contains("rose") || t.contains("bouquet")) return "🌹";
-    if (t.contains("chocolate") || t.contains("mithai")) return "🍫";
-    if (t.contains("baby")) return "👶";
-    if (t.contains("friend") || t.contains("dost")) return "🤝";
-    if (t.contains("graduation")) return "🎓";
-    if (t.contains("quran") || t.contains("islam") || t.contains("namaz")) return "🕌";
-    if (t.contains("her")) return "🧸";
-    return "🎁";
+  // ===== SIRF SEARCH WALA FIX - YAHAN SE SHURU =====
+  String _normalize(String s) {
+    return s.toLowerCase().replaceAll(" ", "").replaceAll("-", "").replaceAll("/", "").trim();
+  }
+bool _matchesSearch(Map<String, String> gift, String query) {
+  if (query.trim().isEmpty) return true;
+  String q = _normalize(query);
+  String name = _normalize(gift["name"] ?? "");
+  String cat = _normalize(gift["category"] ?? "");
+
+  // 1. DIRECT - naam ya category me mile
+  if (name.contains(q) || cat.contains(q)) return true;
+
+  // 2. BROTHER DAY / SISTER DAY / TEACHER DAY JAISE PHRASE
+  // "brother day" likhne par bhi For Him wale gifts aayenge
+  if (q.contains("brother") || q.contains("bhai") || q.contains("boy")) {
+    if (cat == "forhim") return true;
+  }
+  if (q.contains("sister") || q.contains("behan") || q.contains("girl")) {
+    if (cat == "forher") return true;
+  }
+  if (q.contains("teacher") || q.contains("teaher") || q.contains("techer")) {
+    if (cat == "teachersday") return true;
+  }
+  if (q.contains("mother") || q.contains("mom") || q.contains("ami")) {
+    if (cat == "mothersday") return true;
+  }
+  if (q.contains("father") || q.contains("dad") || q.contains("abu")) {
+    if (cat == "fathersday") return true;
+  }
+  if (q.contains("eid") || q.contains("eidi") || q.contains("ramzan") || q.contains("ramadan")) {
+    if (cat == "eid") return true;
+  }
+  if (q.contains("shaadi") || q.contains("wedding") || q.contains("barat")) {
+    if (cat == "weddingbarat") return true;
+  }
+  if (q.contains("birthday")) {
+    if (cat == "birthday") return true;
+  }
+  if (q.contains("valentine") || q.contains("love")) {
+    if (cat == "valentineday" || cat == "forher") return true;
+  }
+  if (q.contains("friend") || q.contains("dost")) {
+    if (cat == "friendshipday") return true;
+  }
+  if (q.contains("baby")) {
+    if (cat == "babyshower") return true;
+  }
+  if (q.contains("ghar") || q.contains("newhome") || q.contains("housewarming")) {
+    if (cat == "housewarming") return true;
+  }
+  if (q.contains("anniversary")) {
+    if (cat == "anniversary") return true;
+  }
+  if (q.contains("graduation")) {
+    if (cat == "graduation") return true;
+  }
+  if (q.contains("newyear")) {
+    if (cat == "newyear") return true;
+  }
+  if (q.contains("thankyou")) {
+    if (cat == "thankyou") return true;
+  }
+  if (q.contains("getwell")) {
+    if (cat == "getwellsoon") return true;
   }
 
-  Color colorFor(String text) {
-    String t = text.toLowerCase();
-    if (t.contains("ramadan")) return Colors.teal;
-    if (t.contains("eid")) return Colors.green;
-    if (t.contains("mother") || t.contains("love") || t.contains("wedding")) return Colors.pink;
-    if (t.contains("father") || t.contains("teacher")) return Colors.blue;
-    if (t.contains("birthday")) return Colors.purple;
-    if (t.contains("brother")) return Colors.orange;
-    return const Color(0xFF7B2FF7);
+  if (q.length >= 4 && cat.length >= 4 && cat.contains(q.substring(0, 4))) return true;
+ 
+  for (String w in query.toLowerCase().split(" ")) {
+    if (w.length >= 3 && (name.contains(w) || cat.contains(w))) return true;
   }
-
-  List<Map<String, dynamic>> smartGifts(String query) {
-    String q = query.trim();
-    if (q.isEmpty) return [];
-    String qLower = q.toLowerCase();
-    String cap = q[0].toUpperCase() + q.substring(1);
-    String emoji = emojiFor(q);
-    Color col = colorFor(q);
-    for (var cat in categories) {
-      String catLower = cat["name"].toString().toLowerCase();
-      if (catLower == qLower || catLower.contains(qLower) || qLower.contains(catLower)) {
-        return allGifts.where((g) => g["category"].toString().toLowerCase() == catLower).toList();
-      }
+  return false;
+}
+  List<Map<String, String>> get filteredGifts {
+    // AGAR SEARCH HO RAHA HAI TO SELECTED CATEGORY KO IGNORE KARO,
+    // POORE allGifts ME SE DHOONDO - IS LIYE TEACHERS DAY MILEGA
+    if (searchText.trim().isNotEmpty) {
+      var found = allGifts.where((g) => _matchesSearch(g, searchText)).toList();
+      // AGAR BILKUL NA MILE TO BHI "NO GIFTS FOUND" NAHI - SAARE GIFTS DIKHA DO
+      if (found.isEmpty) return allGifts;
+      return found;
     }
-    List<Map<String, dynamic>> exact = allGifts.where((g) => g["title"].toString().toLowerCase() == qLower).toList();
-    if (exact.isNotEmpty) return exact;
-    return [
-      {"title": "$cap Gift Box", "desc": "Special Gift Box for $cap", "price": "PKR 2,000+", "type": "Gift Box", "decoration": "Gift Box Decoration", "category": cap, "emoji": emoji, "color": col},
-      {"title": "$cap Bouquet", "desc": "Beautiful Flowers for $cap", "price": "PKR 1,200+", "type": "Flowers Gift", "decoration": "Bouquet Decoration", "category": cap, "emoji": "💐", "color": col},
-      {"title": "$cap Cake", "desc": "Delicious Cake for $cap", "price": "PKR 1,000+", "type": "Cake Gift", "decoration": "Cake Decoration", "category": cap, "emoji": "🎂", "color": col},
-      {"title": "$cap Teddy", "desc": "Cute Teddy for $cap", "price": "PKR 1,500+", "type": "Toy Gift", "decoration": "Teddy Packing", "category": cap, "emoji": "🧸", "color": col},
-      {"title": "$cap Chocolates", "desc": "Premium Chocolates for $cap", "price": "PKR 800+", "type": "Sweet Gift", "decoration": "Chocolate Box", "category": cap, "emoji": "🍫", "color": col},
-      {"title": "$cap Card", "desc": "Lovely Card for $cap", "price": "PKR 500+", "type": "Card Gift", "decoration": "Card + Ribbon", "category": cap, "emoji": "💌", "color": col},
-    ];
+    List<Map<String, String>> list = allGifts;
+    if (selectedCategory != 'All') {
+      list = list.where((g) => g["category"] == selectedCategory).toList();
+    }
+    return list;
   }
 
-  // ===== Gift Detail - Sirf Occasion + Gift Type + Price =====
-  // Decoration aur Theme dono khatam kar diye hain
-  void _showGiftDetail(Map<String, dynamic> gift) {
-    List<Map<String, dynamic>> similar = allGifts.where((g) => g["category"] == gift["category"] && g["title"] != gift["title"]).take(4).toList();
-    showModalBottomSheet(
-      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setSheetState) {
-          bool favNow = favorites.contains(gift["title"]);
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.88,
-            decoration: BoxDecoration(color: isDark ? const Color(0xFF31135E) : Colors.white, borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Center(child: Container(height: 5, width: 50, decoration: BoxDecoration(color: Colors.grey.shade400, borderRadius: BorderRadius.circular(10)))),
-                const SizedBox(height: 16),
-                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Container(height: 110, width: 110, decoration: BoxDecoration(shape: BoxShape.circle, color: isDark ? const Color(0xFF3B1A6B) : const Color(0xFFF6F0FF), border: Border.all(color: const Color(0xFF7B2FF7), width: 2)), child: Center(child: Text(gift["emoji"], style: const TextStyle(fontSize: 56)))),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () { setState(() { favNow ? favorites.remove(gift["title"]) : favorites.add(gift["title"]); }); setSheetState(() {}); },
-                    child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: favNow ? const Color(0xFF7B2FF7) : const Color(0xFFEDE7F6), shape: BoxShape.circle), child: Icon(favNow ? Icons.favorite : Icons.favorite_border, color: favNow ? Colors.white : const Color(0xFF7B2FF7))),
-                  ),
-                ]),
-                const SizedBox(height: 16),
-                Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: isDark ? const Color(0xFF7B2FF7) : const Color(0xFFEDE7F6), borderRadius: BorderRadius.circular(20)), child: Text(gift["category"], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13))),
-                const SizedBox(height: 10),
-                Text(gift["title"], style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, height: 1.2, color: textColor)),
-                const SizedBox(height: 8),
-                Text(gift["desc"], style: TextStyle(color: isDark ? const Color(0xFFE9D5FF) : Colors.grey, fontSize: 15, height: 1.5)),
-                const SizedBox(height: 18),
-                Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFF7B2FF7), Color(0xFFA855F7)]), borderRadius: BorderRadius.circular(16)), child: Row(children: [const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("Price Range - Pakistan", style: TextStyle(color: Colors.white70, fontSize: 12)), SizedBox(height: 2), Text("Best Price", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))]), const Spacer(), Text(gift["price"], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17))])),
-                const SizedBox(height: 18),
-                Text("Gift Details", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: textColor)),
-                const SizedBox(height: 10),
-                // Sirf ye 2 rahenge
-                _detailRow("🎉", "Occasion", gift["category"]),
-                _detailRow("🎁", "Gift Type", gift["type"]),
-                const SizedBox(height: 20),
-                SizedBox(width: double.infinity, child: ElevatedButton.icon(style: ElevatedButton.styleFrom(backgroundColor: favNow ? Colors.pink : const Color(0xFF7B2FF7), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.symmetric(vertical: 14)), onPressed: () { setState(() { favNow ? favorites.remove(gift["title"]) : favorites.add(gift["title"]); }); setSheetState(() {}); }, icon: Icon(favNow ? Icons.favorite : Icons.favorite_border, color: Colors.white, size: 20), label: Text(favNow ? "Saved to Favorites ❤️" : "Save to Favorites", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)))),
-                const SizedBox(height: 22),
-                Text("Similar Gifts", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: textColor)),
-                const SizedBox(height: 12),
-                Wrap(spacing: 16, runSpacing: 16, children: similar.map((g) { return GestureDetector(onTap: () { Navigator.pop(context); _showGiftDetail(g); }, child: SizedBox(width: 80, child: Column(children: [Container(height: 72, width: 72, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF7B2FF7).withOpacity(0.2), border: Border.all(color: const Color(0xFF7B2FF7), width: 1.5)), child: Center(child: Text(g["emoji"], style: const TextStyle(fontSize: 32)))), const SizedBox(height: 6), Text(g["title"], textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, height: 1.2, color: textColor)), Text(g["price"], style: TextStyle(fontSize: 10, color: priceColor, fontWeight: FontWeight.bold))]))); }).toList()),
-              ]),
-            ),
-          );
-        });
-      },
-    );
+  List<Map<String, String>> get suggestionGifts {
+    if (filteredGifts.length <= 6) return filteredGifts;
+    return filteredGifts.sublist(0, 6);
   }
 
-  Widget _detailRow(String emoji, String label, String value) {
-    return Container(margin: const EdgeInsets.only(bottom: 10), padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: detailBg, borderRadius: BorderRadius.circular(12)), child: Row(children: [Text(emoji, style: const TextStyle(fontSize: 22)), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: TextStyle(color: isDark ? const Color(0xFFE9D5FF) : Colors.grey, fontSize: 12)), const SizedBox(height: 2), Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: textColor))]))]));
+  List<Map<String, String>> get recommendationGifts {
+    if (filteredGifts.length <= 6) {
+      // PEHLE 6 SUGGESTION ME CHALE GAYE, TO RECOMMENDATION KHAALI NA HO
+      // IS LIYE BAAKI GIFTS ME SE LE LO - "NO MORE GIFTS" KABHI NAHI AAYEGA
+      var rest = allGifts.where((g) => !suggestionGifts.contains(g)).toList();
+      if (rest.length <= 6) return rest;
+      return rest.sublist(0, 6);
+    }
+    if (filteredGifts.length <= 12) {
+      return filteredGifts.sublist(6);
+    }
+    return filteredGifts.sublist(6, 12);
+  }
+  // ===== SIRF SEARCH WALA FIX - YAHAN KHATAM =====
+
+  List<Map<String, String>> get favoriteGifts {
+    return allGifts.where((g) => favoriteNames.contains(g["name"])).toList();
   }
 
-  // ===== Gift Card - Overflow Fix =====
-  // Pehle height 170 thi, is liye 2.0 pixels overflow aa raha tha. Ab height 190 kar di hai
-  Widget _giftCard(Map<String, dynamic> gift) {
-    bool isFav = favorites.contains(gift["title"]);
-    return GestureDetector(
-      onTap: () => _showGiftDetail(gift),
-      child: Container(
-        width: 150,
-        height: 182,
-        margin: const EdgeInsets.only(right: 12, bottom: 4),
-        decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(18)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Stack(children: [
-            Container(height: 100, width: double.infinity, decoration: BoxDecoration(color: isDark ? const Color(0xFF3B1A6B) : (gift["color"] as Color).withOpacity(0.12), borderRadius: const BorderRadius.vertical(top: Radius.circular(18))), child: Center(child: Text(gift["emoji"], style: const TextStyle(fontSize: 52)))),
-            Positioned(right: 8, top: 8, child: GestureDetector(onTap: () { setState(() { isFav ? favorites.remove(gift["title"]) : favorites.add(gift["title"]); }); }, child: CircleAvatar(radius: 14, backgroundColor: Colors.white, child: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: const Color(0xFF7B2FF7))))),
-          ]),
-          Padding(padding: const EdgeInsets.all(10), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(gift["title"], maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor)), const SizedBox(height: 2), Text(gift["price"], style: TextStyle(color: priceColor, fontWeight: FontWeight.bold, fontSize: 12))])),
-        ]),
+  // CATEGORY KO FAVOURITE KARNA
+  void toggleCategoryFavourite(String category) {
+    setState(() {
+      if (favoriteCategories.contains(category)) {
+        favoriteCategories.remove(category);
+      } else {
+        favoriteCategories.add(category);
+      }
+    });
+  }
+
+  void toggleGiftFavourite(Map<String, String> gift) {
+    setState(() {
+      String name = gift["name"] ?? "";
+      if (favoriteNames.contains(name)) {
+        favoriteNames.remove(name);
+      } else {
+        favoriteNames.add(name);
+      }
+    });
+  }
+
+  void openGiftDetail(Map<String, String> gift) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GiftDetailScreen(
+          gift: gift,
+          isDark: isDark,
+          // AB GIFT KI JAGAH USKI CATEGORY FAVOURITE HOGI
+          isFavorite:
+              favoriteCategories.contains(gift["category"] ?? ""),
+          onFavoriteToggle: () =>
+              toggleCategoryFavourite(gift["category"] ?? ""),
+        ),
       ),
     );
+    setState(() {});
+  }
+
+  String getEmojiForCategory(String cat) {
+    for (var c in [...topCategories, ...moreCategories]) {
+      if (c["name"] == cat) return c["emoji"] ?? "🎁";
+    }
+    return "🎁";
   }
 
   @override
   Widget build(BuildContext context) {
-    String s = searchText.trim();
-    List<Map<String, dynamic>> searchedGifts = s.isNotEmpty && selectedCategory == null ? smartGifts(s) : [];
-    List<Map<String, dynamic>> categoryGifts = selectedCategory != null ? allGifts.where((g) => g["category"] == selectedCategory).toList() : [];
-    List<Map<String, dynamic>> popular = allGifts.take(12).toList();
-    List<Map<String, dynamic>> recommended = allGifts.skip(12).toList();
-    List<Map<String, dynamic>> topCategories = categories.take(5).toList();
-    List<Map<String, dynamic>> moreCategories = categories.skip(5).toList();
+    final bgColor = isDark ? const Color(0xFF2D1454) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    int totalFav = favoriteCategories.length + favoriteNames.length;
 
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.asset('assets/images/logo.jpg', height: 48, width: 48, fit: BoxFit.cover)),
-              const SizedBox(width: 10),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("GiftFinder", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor, height: 1.1)), Text("Find the Perfect Gift 💜", style: TextStyle(fontSize: 12, color: subTextColor, height: 1.2))])),
-              Stack(children: [
-                GestureDetector(onTap: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(favorites.isEmpty ? "No favorites yet ❤️" : "You have ${favorites.length} favorites ❤️"), backgroundColor: const Color(0xFF7B2FF7))); }, child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: cardColor, shape: BoxShape.circle), child: const Icon(Icons.favorite_border, color: Color(0xFF7B2FF7), size: 22))),
-                if (favorites.isNotEmpty) Positioned(right: 0, top: 0, child: CircleAvatar(radius: 9, backgroundColor: Colors.pink, child: Text("${favorites.length}", style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)))),
-              ]),
-            ]),
-            const SizedBox(height: 16),
-
-            Row(children: [
-              Expanded(child: Container(decoration: BoxDecoration(color: searchColor, borderRadius: BorderRadius.circular(30)), child: TextField(onChanged: (v) { setState(() { searchText = v; selectedCategory = null; }); }, style: TextStyle(color: textColor), decoration: InputDecoration(hintText: "Search for gifts... (e.g. Birthday, Friend)", hintStyle: TextStyle(color: isDark ? const Color(0xFFE9D5FF) : Colors.grey, fontSize: 13), prefixIcon: Icon(Icons.search, color: isDark ? const Color(0xFFE9D5FF) : Colors.grey), border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none), filled: true, fillColor: searchColor)))),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () { setState(() { isDark = !isDark; }); },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding: const EdgeInsets.all(12),
-                  decoration: const BoxDecoration(color: Color(0xFF7B2FF7), shape: BoxShape.circle),
-                  child: Icon(isDark ? Icons.light_mode : Icons.dark_mode, color: Colors.white, size: 22),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/images/logo.jpg',
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'GIFTIFY',
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FavoritesScreen(
+                            favoriteGifts: favoriteGifts,
+                            favoriteCategories: favoriteCategories.toList(),
+                            isDark: isDark,
+                            onRemoveCategory: (cat) {
+                              setState(() {
+                                favoriteCategories.remove(cat);
+                              });
+                            },
+                            onRemoveGift: (name) {
+                              setState(() {
+                                favoriteNames.remove(name);
+                              });
+                            },
+                            onClearAll: () {
+                              setState(() {
+                                favoriteCategories.clear();
+                                favoriteNames.clear();
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                      setState(() {});
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(Icons.favorite_border,
+                              color: Colors.blue, size: 28),
+                          if (totalFav > 0)
+                            Positioned(
+                              right: -6,
+                              top: -6,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle),
+                                child: Text(
+                                  '$totalFav',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: TextField(
+                        controller: searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            searchText = value;
+                          });
+                        },
+                        style: TextStyle(color: textColor),
+                        decoration: InputDecoration(
+                          hintText: 'Search gifts...',
+                          hintStyle: TextStyle(
+                              color: textColor.withValues(alpha: 0.6)),
+                          border: InputBorder.none,
+                          icon: Icon(Icons.search,
+                              color: textColor.withValues(alpha: 0.6)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isDark = !isDark;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF7B2FF7),
+                        shape: BoxShape.circle,
+                      ),
+                     child: const Icon(
+  Icons.nightlight_round,
+  color: Colors.white,
+  size: 28,
+),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text('Categories',
+                  style: TextStyle(
+                      color: textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    ...topCategories.map((cat) {
+                      bool isSel = selectedCategory == cat["name"];
+                      return _categoryCircle(cat, isSel, textColor, isDark);
+                    }),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showMoreCategories = !showMoreCategories;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 14),
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 84,
+                              height: 84,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: showMoreCategories
+                                    ? Colors.deepPurple
+                                    : Colors.purple.withValues(alpha: 0.3),
+                                border: showMoreCategories
+                                    ? Border.all(
+                                        color: Colors.white, width: 2)
+                                    : null,
+                              ),
+                              child: const Center(
+                                child: Icon(Icons.add,
+                                    color: Colors.white, size: 36),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text("More",
+                                style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ]),
-            Padding(
-              padding: const EdgeInsets.only(top: 8, right: 4),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [Text(isDark ? "💜 Logo Purple Dark Mode On" : "☀️ Light Mode On", style: TextStyle(fontSize: 11, color: subTextColor, fontWeight: FontWeight.w600))]),
-            ),
-            const SizedBox(height: 10),
-
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              ...topCategories.map((cat) {
-                bool isSel = selectedCategory == cat["name"];
-                return GestureDetector(onTap: () { setState(() { selectedCategory = isSel ? null : cat["name"]; searchText = ""; showAllCategories = false; }); }, child: Column(children: [Container(height: 62, width: 62, decoration: BoxDecoration(color: isSel ? const Color(0xFF7B2FF7) : catBg, borderRadius: BorderRadius.circular(18)), child: Center(child: Text(cat["emoji"], style: const TextStyle(fontSize: 32)))), const SizedBox(height: 6), Text(cat["name"], style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: isSel ? const Color(0xFF7B2FF7) : textColor))]));
-              }).toList(),
-              GestureDetector(onTap: () { setState(() { showAllCategories = !showAllCategories; selectedCategory = null; searchText = ""; }); }, child: Column(children: [Container(height: 62, width: 62, decoration: BoxDecoration(color: showAllCategories ? const Color(0xFF7B2FF7) : catBg, borderRadius: BorderRadius.circular(18)), child: const Center(child: Text("▦", style: TextStyle(fontSize: 28, color: Colors.white)))), const SizedBox(height: 6), Text("More", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textColor))])),
-            ]),
-
-            if (showAllCategories) ...[
-              const SizedBox(height: 18),
-              Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(18)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text("All Categories", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)), const Text("✨", style: TextStyle(fontSize: 16))]),
-                const SizedBox(height: 12),
-                Wrap(spacing: 14, runSpacing: 14, children: moreCategories.map((cat) { return GestureDetector(onTap: () { setState(() { selectedCategory = cat["name"]; showAllCategories = false; }); }, child: SizedBox(width: 72, child: Column(children: [Container(height: 60, width: 60, decoration: BoxDecoration(color: catBg, borderRadius: BorderRadius.circular(16)), child: Center(child: Text(cat["emoji"], style: const TextStyle(fontSize: 30)))), const SizedBox(height: 5), Text(cat["name"], textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textColor, height: 1.1))]))); }).toList()),
-              ])),
-            ],
-            const SizedBox(height: 18),
-
-            if (selectedCategory != null || s.isNotEmpty) ...[
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(selectedCategory != null ? "$selectedCategory Gifts" : "Related Gifts for '$s'", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor))), GestureDetector(onTap: () { setState(() { selectedCategory = null; searchText = ""; }); }, child: const Text("Show All", style: TextStyle(color: Color(0xFF7B2FF7), fontWeight: FontWeight.bold)))]),
+              if (showMoreCategories) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('More Categories',
+                          style: TextStyle(
+                              color: textColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: moreCategories.map((cat) {
+                          bool isSel = selectedCategory == cat["name"];
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedCategory = cat["name"]!;
+                              });
+                            },
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 78,
+                                  height: 78,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isSel
+                                        ? Colors.deepPurple
+                                        : isDark
+                                            ? Colors.white
+                                                .withValues(alpha: 0.2)
+                                            : Colors.grey.shade200,
+                                    border: isSel
+                                        ? Border.all(
+                                            color: Colors.white, width: 2)
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Text(cat["emoji"] ?? "🎁",
+                                        style: const TextStyle(fontSize: 34)),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                SizedBox(
+                                  width: 78,
+                                  child: Text(
+                                    cat["name"] ?? "",
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    style: TextStyle(
+                                        color: textColor,
+                                        fontSize: 12,
+                                        fontWeight: isSel
+                                            ? FontWeight.bold
+                                            : FontWeight.normal),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 20),
+              // SELECTED CATEGORY + USKA FAVOURITE BUTTON
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                        selectedCategory == 'All'
+                            ? 'Suggestions for you'
+                            : '$selectedCategory Gifts',
+                        style: TextStyle(
+                            color: textColor,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                  if (selectedCategory != 'All')
+                    GestureDetector(
+                      onTap: () =>
+                          toggleCategoryFavourite(selectedCategory),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: favoriteCategories
+                                  .contains(selectedCategory)
+                              ? Colors.red
+                              : Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          favoriteCategories.contains(selectedCategory)
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: favoriteCategories
+                                  .contains(selectedCategory)
+                              ? Colors.white
+                              : Colors.red,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               const SizedBox(height: 12),
-              Wrap(spacing: 12, runSpacing: 12, children: (selectedCategory != null ? categoryGifts : searchedGifts).map((g) => _giftCard(g)).toList()),
-              const SizedBox(height: 18),
+              if (suggestionGifts.isEmpty)
+                Text('No gifts found',
+                    style: TextStyle(color: textColor)),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: suggestionGifts.map((gift) {
+                    return _giftCircle(gift, textColor, isDark, false);
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text('Recommendations',
+                  style: TextStyle(
+                      color: textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              if (recommendationGifts.isEmpty)
+                Text('No more gifts',
+                    style: TextStyle(
+                        color: textColor.withValues(alpha: 0.6))),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: recommendationGifts.map((gift) {
+                    return _giftCircle(gift, textColor, isDark, true);
+                  }).toList(),
+                ),
+              ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
 
-            // ===== Banner - Gift Box ki jagah Asli Logo, Explore Gifts khatam =====
-            Container(width: double.infinity, padding: const EdgeInsets.all(18), decoration: BoxDecoration(gradient: isDark ? const LinearGradient(colors: [Color(0xFF7B2FF7), Color(0xFFA855F7)], begin: Alignment.topLeft, end: Alignment.bottomRight) : const LinearGradient(colors: [Color(0xFFD9C6FF), Color(0xFFB388FF)], begin: Alignment.topLeft, end: Alignment.bottomRight), borderRadius: BorderRadius.circular(22)), child: Row(children: [
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text("Let's Find", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black, height: 1.1)),
-                Text("the Perfect Gift!", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black, height: 1.1)),
-                const SizedBox(height: 8),
-                Text("Make every moment\nmore special", style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13, height: 1.3)),
-                // Explore Gifts wala button yahan se khatam kar diya hai
-              ])),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset('assets/images/logo.jpg', height: 140, width: 140, fit: BoxFit.cover),
+  Widget _categoryCircle(Map<String, String> cat, bool isSel,
+      Color textColor, bool isDark) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCategory = cat["name"]!;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(right: 14),
+        child: Column(
+          children: [
+            Container(
+              width: 84,
+              height: 84,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSel
+                    ? Colors.deepPurple
+                    : isDark
+                        ? Colors.white.withValues(alpha: 0.15)
+                        : Colors.grey.shade200,
+                border: isSel
+                    ? Border.all(color: Colors.white, width: 2)
+                    : null,
               ),
-            ])),
-            const SizedBox(height: 22),
+              child: Center(
+                child: Text(
+                  cat["emoji"] ?? "🎁",
+                  style: const TextStyle(fontSize: 38),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              cat["name"] ?? "",
+              style: TextStyle(
+                  color: textColor,
+                  fontSize: 13,
+                  fontWeight: isSel ? FontWeight.bold : FontWeight.normal),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-            // ===== Popular Gifts - Sirf Home par scroll hoga, naya page nahi =====
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Row(children: [const Text("⭐", style: TextStyle(fontSize: 20)), const SizedBox(width: 6), Text("Popular Gifts", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor))]),
-              GestureDetector(
-                onTap: () { setState(() { showAllPopular = !showAllPopular; }); },
-                child: Text(showAllPopular ? "Show Less ↑" : "See All →", style: const TextStyle(color: Color(0xFF7B2FF7), fontWeight: FontWeight.w600)),
+  Widget _giftCircle(Map<String, String> gift, Color textColor, bool isDark,
+      bool isRecommendation) {
+    return GestureDetector(
+      onTap: () => openGiftDetail(gift),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 14),
+        child: Column(
+          children: [
+            Container(
+              width: 84,
+              height: 84,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isRecommendation
+                    ? Colors.purple.withValues(alpha: 0.25)
+                    : isDark
+                        ? Colors.white.withValues(alpha: 0.15)
+                        : Colors.grey.shade200,
               ),
-            ]),
-            const SizedBox(height: 12),
-            if (!showAllPopular)
-              SizedBox(height: 190, child: ListView(scrollDirection: Axis.horizontal, children: popular.map((g) => _giftCard(g)).toList()))
-            else
-              Wrap(spacing: 0, runSpacing: 12, children: popular.map((g) => _giftCard(g)).toList()),
-            const SizedBox(height: 22),
-
-            // ===== Recommended - Sirf Home par scroll hoga, naya page nahi =====
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Row(children: [const Text("✦", style: TextStyle(fontSize: 20, color: Color(0xFF7B2FF7))), const SizedBox(width: 6), Text("Recommended For You", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor))]),
-              GestureDetector(
-                onTap: () { setState(() { showAllRecommended = !showAllRecommended; }); },
-                child: Text(showAllRecommended ? "Show Less ↑" : "See All →", style: const TextStyle(color: Color(0xFF7B2FF7), fontWeight: FontWeight.w600)),
+              child: Center(
+                child: Text(gift["emoji"] ?? "🎁",
+                    style: const TextStyle(fontSize: 38)),
               ),
-            ]),
-            const SizedBox(height: 12),
-            if (!showAllRecommended)
-              SizedBox(height: 190, child: ListView(scrollDirection: Axis.horizontal, children: recommended.map((g) => _giftCard(g)).toList()))
-            else
-              Wrap(spacing: 0, runSpacing: 12, children: recommended.map((g) => _giftCard(g)).toList()),
-          ]),
+            ),
+            const SizedBox(height: 6),
+            SizedBox(
+              width: 84,
+              child: Text(gift["name"] ?? "",
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  style: TextStyle(color: textColor, fontSize: 12)),
+            ),
+          ],  
         ),
       ),
     );
