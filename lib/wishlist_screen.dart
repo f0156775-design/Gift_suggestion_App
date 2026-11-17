@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'screens/relation_gifts_screen.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -76,11 +77,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
       return;
     }
 
-    Navigator.pop(context, {
-      'gender': selectedGender,
-      'age': int.parse(ageController.text.trim()),
-      'relationship': selectedRelationship,
-    });
+    // NEXT SCREEN: sirf selected relationship ke gifts
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RelationGiftsScreen(
+          relationship: selectedRelationship!,
+          gender: selectedGender!,
+          age: int.parse(ageController.text.trim()),
+        ),
+      ),
+    );
   }
 
   @override

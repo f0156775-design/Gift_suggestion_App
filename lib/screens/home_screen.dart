@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gift_suggestion_app/screens/gift-detail-screen.dart';
 import 'favorites_screen.dart';
-import 'gift-detail-screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
