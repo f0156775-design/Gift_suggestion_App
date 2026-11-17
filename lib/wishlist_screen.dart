@@ -121,13 +121,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            const Center(
-              child: Icon(
-                Icons.card_giftcard,
-                size: 75,
-                color: Color(0xFFAD4777),
-              ),
-            ),
+           Center(
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(20),
+    child: Image.asset(
+      'assets/images/logo.jpg',
+      width: 160,
+      height: 160,
+      fit: BoxFit.cover,
+    ),
+  ),
+),
 
             const SizedBox(height: 12),
 

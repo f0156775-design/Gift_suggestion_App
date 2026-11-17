@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/relation_gifts.dart';
 import 'gift-detail-screen.dart';
-
+import 'favorites_screen.dart';
 // WISHLIST FORM SUBMIT HONE KE BAAD YEH SCREEN KHULTI HAI
 // Sirf usi relationship ke gifts dikhte hain jo form mein select ki thi.
 class RelationGiftsScreen extends StatefulWidget {
@@ -61,15 +61,70 @@ class _RelationGiftsScreenState extends State<RelationGiftsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: background,
-      appBar: AppBar(
-        title: Text(
-          'Gifts for ${widget.relationship}',
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+     appBar: AppBar(
+  title: Text(
+    'Gifts for ${widget.relationship}',
+    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+  ),
+  centerTitle: true,
+  backgroundColor: primary,
+  iconTheme: const IconThemeData(color: Colors.white),
+  actions: [
+    Stack(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.favorite, color: Colors.white),
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FavoritesScreen(
+                  favoriteGifts: gifts
+                      .where((g) => favoriteNames.contains(g["name"]))
+                      .toList(),
+                  favoriteCategories: const [],
+                  isDark: false,
+                  onRemoveCategory: (_) {},
+                  onRemoveGift: (name) {
+                    setState(() {
+                      favoriteNames.remove(name);
+                    });
+                  },
+                  onClearAll: () {
+                    setState(() {
+                      favoriteNames.clear();
+                    });
+                  },
+                ),
+              )
+            );
+            setState(() {});
+          },
         ),
-        centerTitle: true,
-        backgroundColor: primary,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+        if (favoriteNames.isNotEmpty)
+          Positioned(
+            right: 6,
+            top: 6,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                '${favoriteNames.length}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+      ],
+    ),
+  ],
+),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
