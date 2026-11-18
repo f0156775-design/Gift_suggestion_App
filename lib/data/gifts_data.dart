@@ -163,7 +163,7 @@ List<Gift> allGifts = [
   Gift(name: 'Perfume', price: 2000, emoji: '🌸', occasion: 'Thank You'),
   Gift(name: 'Photo Frame', price: 1200, emoji: '🖼️', occasion: 'Thank You'),
 
-  // Get Well Soon
+  
   Gift(name: 'Flowers', price: 1500, emoji: '💐', occasion: 'Get Well Soon'),
   Gift(name: 'Fruits Basket', price: 2000, emoji: '🍎', occasion: 'Get Well Soon'),
   Gift(name: 'Get Well Card', price: 500, emoji: '💌', occasion: 'Get Well Soon'),
