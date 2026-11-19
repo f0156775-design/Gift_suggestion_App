@@ -125,7 +125,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
   child: ClipRRect(
     borderRadius: BorderRadius.circular(20),
     child: Image.asset(
-      'assets/images/logo.jpg',
+      'assets/images/logo.png',
       width: 160,
       height: 160,
       fit: BoxFit.cover,

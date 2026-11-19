@@ -406,7 +406,7 @@ bool _matchesSearch(Map<String, String> gift, String query) {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Image.asset(
-                          'assets/images/logo.jpg',
+                          'assets/images/logo.png',
                           width: 48,
                           height: 48,
                           fit: BoxFit.cover,
