@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/relation_gifts_screen.dart';
 
 class WishlistScreen extends StatefulWidget {
@@ -33,7 +34,61 @@ class _WishlistScreenState extends State<WishlistScreen> {
     'Other',
   ];
 
-  void addToCart() {
+  // LOAD SAVED DATA
+  @override
+  void initState() {
+    super.initState();
+    loadWishlistData();
+  }
+
+  Future<void> loadWishlistData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (!mounted) return;
+
+    setState(() {
+      selectedGender = prefs.getString('gender');
+      selectedRelationship =
+          prefs.getString('relationship');
+
+      ageController.text =
+          prefs.getInt('age')?.toString() ?? '';
+
+      addedToCart =
+          prefs.getBool('addedToCart') ?? false;
+    });
+  }
+
+  // SAVE DATA LOCALLY
+  Future<void> saveWishlistData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (selectedGender != null) {
+      await prefs.setString('gender', selectedGender!);
+    } else {
+      await prefs.remove('gender');
+    }
+
+    if (selectedRelationship != null) {
+      await prefs.setString(
+          'relationship', selectedRelationship!);
+    } else {
+      await prefs.remove('relationship');
+    }
+
+    final age = int.tryParse(ageController.text.trim());
+
+    if (age != null) {
+      await prefs.setInt('age', age);
+    } else {
+      await prefs.remove('age');
+    }
+
+    await prefs.setBool('addedToCart', addedToCart);
+  }
+
+  // ADD TO CART
+  Future<void> addToCart() async {
     if (selectedGender == null ||
         selectedRelationship == null ||
         ageController.text.trim().isEmpty) {
@@ -60,6 +115,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
       addedToCart = true;
     });
 
+    await saveWishlistData();
+
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Added to Cart Successfully!'),
@@ -67,6 +126,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
+  // SUBMIT FORM
   void submitForm() {
     if (!addedToCart) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +137,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
       return;
     }
 
-    // NEXT SCREEN: sirf selected relationship ke gifts
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -121,17 +180,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-           Center(
-  child: ClipRRect(
-    borderRadius: BorderRadius.circular(20),
-    child: Image.asset(
-      'assets/images/logo.png',
-      width: 160,
-      height: 160,
-      fit: BoxFit.cover,
-    ),
-  ),
-),
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 160,
+                  height: 160,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
 
             const SizedBox(height: 12),
 
@@ -182,11 +241,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   child: Text(gender),
                 );
               }).toList(),
-              onChanged: (value) {
+              onChanged: (value) async {
                 setState(() {
                   selectedGender = value;
                   addedToCart = false;
                 });
+
+                await saveWishlistData();
               },
             ),
 
@@ -202,10 +263,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
             TextField(
               controller: ageController,
               keyboardType: TextInputType.number,
-              onChanged: (_) {
+              onChanged: (_) async {
                 setState(() {
                   addedToCart = false;
                 });
+
+                await saveWishlistData();
               },
               decoration: InputDecoration(
                 hintText: 'Enter Age',
@@ -244,11 +307,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   child: Text(relation),
                 );
               }).toList(),
-              onChanged: (value) {
+              onChanged: (value) async {
                 setState(() {
                   selectedRelationship = value;
                   addedToCart = false;
                 });
+
+                await saveWishlistData();
               },
             ),
 
